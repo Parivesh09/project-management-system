@@ -1,0 +1,214 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
+enum NotificationType {
+  EMAIL
+  IN_APP
+  BOTH
+  NONE
+}
+
+model User {
+  id                String       @id @default(uuid())
+  email             String       @unique
+  password          String
+  name              String
+  role              Role        @default(USER)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  notificationPref  NotificationType @default(IN_APP)
+  useCustomEmail    Boolean     @default(false)
+  smtpHost          String?
+  smtpPort          String?
+  smtpSecure        Boolean     @default(true)
+  smtpUser          String?
+  smtpPass          String?
+  smtpFrom          String?
+  teamMemberships   TeamMember[]
+  ownedProjects     Project[]   @relation("OwnedProjects")
+  managedProjects   Project[]   @relation("ManagedProjects")
+  createdTasks      Task[]      @relation("CreatedTasks")
+  assignedTasks     Task[]      @relation("AssignedTasks")
+  comments          Comment[]
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+  uploadedAttachments Attachment[]
+}
+
+model Team {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  inviteCode  String?     @unique @default(uuid())
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  members     TeamMember[]
+  projects    ProjectTeam[]
+  invites     TeamInvite[]
+}
+
+model TeamMember {
+  id       String   @id @default(uuid())
+  userId   String
+  teamId   String
+  role     Role     @default(USER)
+  joinedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  team     Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([userId, teamId])
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  ownerId     String
+  managerId   String?
+  owner       User      @relation("OwnedProjects", fields: [ownerId], references: [id])
+  manager     User?     @relation("ManagedProjects", fields: [managerId], references: [id])
+  tasks       Task[]
+  teams       ProjectTeam[]
+}
+
+model ProjectTeam {
+  id        String   @id @default(uuid())
+  projectId String
+  teamId    String
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([projectId, teamId])
+}
+
+model Task {
+  id          String      @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus  @default(TODO)
+  priority    Priority    @default(MEDIUM)
+  dueDate     DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  // Optional project association
+  projectId   String?
+  project     Project?    @relation(fields: [projectId], references: [id])
+  
+  // Creator and assignee
+  creatorId   String
+  creator     User        @relation("CreatedTasks", fields: [creatorId], references: [id])
+  assigneeId  String?
+  assignee    User?       @relation("AssignedTasks", fields: [assigneeId], references: [id])
+  
+  // Recurring task fields
+  isRecurring Boolean     @default(false)
+  frequency   Frequency?
+  lastRun     DateTime?
+  nextRun     DateTime?
+  
+  // Audit fields
+  comments    Comment[]
+  attachments Attachment[]
+  auditLogs   AuditLog[]
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Frequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+model Attachment {
+  id         String   @id @default(uuid())
+  fileURL    String
+  fileName   String?
+  createdAt  DateTime @default(now())
+  taskId     String
+  uploaderId String
+  task       Task     @relation(fields: [taskId], references: [id])
+  uploader   User     @relation(fields: [uploaderId], references: [id])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  taskId    String
+  userId    String
+  task      Task     @relation(fields: [taskId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  message   String
+  type      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  action      String
+  entityType  String
+  entityId    String
+  details     Json?
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  task        Task?     @relation(fields: [taskId], references: [id])
+  taskId      String?
+}
+
+model TeamInvite {
+  id        String   @id @default(uuid())
+  teamId    String
+  email     String
+  status    String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  team      Team     @relation(fields: [teamId], references: [id])
+
+  @@unique([teamId, email])
+}
