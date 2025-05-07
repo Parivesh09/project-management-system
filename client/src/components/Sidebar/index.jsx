@@ -6,6 +6,7 @@ import {
   useGetCurrentUserQuery,
   useGetProjectsQuery,
 } from "../../redux/services/api";
+import logo from "../../../public/3150824_447242-PFLVY7-676.svg";
 import { logout } from "../../redux/slices/authSlice";
 import {
   AlertCircle,
@@ -92,8 +93,9 @@ const Sidebar = () => {
       <div className="flex h-[100%] w-full flex-col justify-start">
         {/* TOP LOGO */}
         <div className="z-50 flex min-h-[56px] w-64 items-center justify-between bg-white px-6 pt-3 dark:bg-black">
-          <div className="text-xl font-bold text-gray-800 dark:text-white">
-            EDLIST
+          <div className="text-sm flex items-center gap-2 font-bold text-gray-800 dark:text-white">
+            <Image src={logo} alt="logo" width={40} height={40} />
+            TMS-Stamurai
           </div>
           {isSidebarCollapsed ? null : (
             <button
@@ -109,12 +111,12 @@ const Sidebar = () => {
         {/* NAVBAR LINKS */}
         <nav className="z-10 w-full">
           <SidebarLink icon={Home} label="Dashboard" href="/" />
-          <SidebarLink icon={AssignmentIcon} label="Tasks" href="/tasks" />
-          <SidebarLink icon={Search} label="Search" href="/search" />
-          <SidebarLink icon={Settings} label="Settings" href="/settings" />
+          <SidebarLink icon={AssignmentIcon} label="My Tasks" href="/tasks" />
           {isAdmin && <SidebarLink icon={User} label="Users" href="/users" />}
           <SidebarLink icon={Users} label="Teams" href="/teams" />
           <SidebarLink icon={FolderOpenDot} label="Projects" href="/projects" />
+          <SidebarLink icon={Search} label="GlobalSearch" href="/search" />
+          <SidebarLink icon={Settings} label="Settings" href="/settings" />
         </nav>
 
         {/* PROJECTS LINKS */}

@@ -1,74 +1,106 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
-
+const { createNotification } = require('./models/notification');
+const { getPreferences } = require('./models/notificationPreferences');
+const { sendNotificationEmail } = require('./services/emailService');
 const prisma = new PrismaClient();
 
 let io;
 
 const initializeSocket = (server) => {
   io = new Server(server, {
+    path: '/socket.io',
     cors: {
-      origin: process.env.CLIENT_URL,
-      methods: ['GET', 'POST']
-    }
+      origin: process.env.CLIENT_URL || 'http://localhost:3000',
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000,
   });
 
+  // Authentication middleware
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
       if (!token) {
-        throw new Error('Authentication error');
+        return next(new Error('Authentication error'));
       }
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await prisma.user.findUnique({
-        where: { id: decoded.userId }
-      });
-
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      socket.user = user;
+      socket.userId = decoded.id;
       next();
     } catch (error) {
+      console.error('Socket authentication error:', error);
       next(new Error('Authentication error'));
     }
   });
 
   io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.user.id}`);
+    console.log('User connected:', socket.userId);
     
-    // Join a personal room for private notifications
-    socket.join(socket.user.id);
+    // Join user's personal room
+    socket.join(`user:${socket.userId}`);
 
     socket.on('disconnect', () => {
-      console.log(`User disconnected: ${socket.user.id}`);
+      console.log('User disconnected:', socket.userId);
+    });
+
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
     });
   });
+
+  return io;
+};
+
+const getIO = () => {
+  if (!io) {
+    throw new Error('Socket.io not initialized');
+  }
+  return io;
 };
 
 const sendNotification = async (userId, notification) => {
   try {
-    // Save notification to database
-    await prisma.notification.create({
-      data: {
-        ...notification,
-        userId
-      }
+    // Get user's notification preferences
+    const preferences = await getPreferences(userId);
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
     });
 
-    // Send real-time notification
-    if (io) {
-      io.to(userId).emit('notification', notification);
+    // Save notification to database
+    const savedNotification = await createNotification({
+      userId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      link: notification.link,
+    });
+
+    // Send in-app notification if enabled
+    if (preferences.inApp && preferences[notification.type]) {
+      io.to(`user:${userId}`).emit('notification', savedNotification);
     }
+
+    // Send email notification if enabled
+    if (preferences.email && preferences[notification.type] && user?.email) {
+      await sendNotificationEmail(user.email, savedNotification);
+    }
+
+    return savedNotification;
   } catch (error) {
     console.error('Error sending notification:', error);
+    throw error;
   }
 };
 
 module.exports = {
   initializeSocket,
-  sendNotification
+  getIO,
+  sendNotification,
 }; 

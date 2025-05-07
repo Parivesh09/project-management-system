@@ -7,7 +7,7 @@ import {
 } from "../../redux/services/api";
 import { Priority } from "../../constants/priority";
 import { sendingStatus } from "../../constants/status";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { formatISO, parseISO } from "date-fns";
 import {
   FormControl,
@@ -34,6 +34,12 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
   const [dueDate, setDueDate] = useState("");
   const [assigneeId, setAssigneeId] = useState("");
 
+  // Check if user has permission to edit the task
+  const canEditTask = useMemo(() => {
+    if (!currentUser || !task) return false;
+    return currentUser.role === 'ADMIN' || task.creatorId === currentUser.id;
+  }, [currentUser, task]);
+
   // Initialize form with task data when task changes
   useEffect(() => {
     if (task) {
@@ -54,6 +60,10 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
 
   const handleSubmit = async () => {
     if (!title || !dueDate || !task?.id) return;
+    if (!canEditTask) {
+      setError("You don't have permission to edit this task.");
+      return;
+    }
     setError("");
 
     try {
@@ -93,6 +103,42 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
     return null;
   }
 
+  if (!canEditTask) {
+    return (
+      <Modal isOpen={isOpen} onClose={onClose} name="View Task">
+        <div className="mt-4 space-y-6">
+          <Alert severity="warning" className="mb-4">
+            You don't have permission to edit this task.
+          </Alert>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold dark:text-white">{task.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300">{task.description}</p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Status</p>
+                <p className="dark:text-white">{task.status}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Priority</p>
+                <p className="dark:text-white">{task.priority}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Due Date</p>
+                <p className="dark:text-white">
+                  {task.dueDate ? formatISO(parseISO(task.dueDate), { representation: "date" }) : "No due date"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Assignee</p>
+                <p className="dark:text-white">{task.assignee?.name || "Unassigned"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+    );
+  }
+
   const onModalClose = () => {
     setError("");
     onClose();
@@ -100,6 +146,10 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
 
   const handleDeleteTask = async () => {
     if (!task?.id) return;
+    if (!canEditTask) {
+      setError("You don't have permission to delete this task.");
+      return;
+    }
     try {
       await deleteTask(task.id).unwrap();
       onClose();

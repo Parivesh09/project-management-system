@@ -40,15 +40,16 @@ scheduleRecurringTasks();
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/teams', teamRoutes);
-app.use('/api/tasks', taskRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/notifications', authenticate, require('./routes/notifications'));
+app.use('/api/users', authenticate, userRoutes);
+app.use('/api/projects', authenticate, projectRoutes);
+app.use('/api/teams', authenticate, teamRoutes);
+app.use('/api/tasks', authenticate, taskRoutes);
+app.use('/api/dashboard', authenticate, dashboardRoutes);
 app.use('/api/search', authenticate, require('./routes/searchRoutes'));
-app.use('/api/analytics', authenticate, authorize(['ADMIN', 'MANAGER']), require('./routes/analytics'));
-app.use('/api/audit-logs', authenticate, authorize(['ADMIN']), require('./routes/auditLogs'));
+app.use('/api/analytics', authenticate, require('./routes/analytics'));
+app.use('/api/audit-logs', authenticate, require('./routes/auditLogs'));
+app.use('/api/notifications', authenticate, require('./routes/notifications'));
+app.use('/api/notification-preferences', authenticate, require('./routes/notificationPreferencesRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {

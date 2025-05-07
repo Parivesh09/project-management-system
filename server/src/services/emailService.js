@@ -67,6 +67,46 @@ const sendTeamInvitation = async (email, teamName, inviter, inviteCode) => {
   }
 };
 
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: process.env.SMTP_PORT,
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+const sendNotificationEmail = async (userEmail, notification) => {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_FROM,
+      to: userEmail,
+      subject: notification.title,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">${notification.title}</h2>
+          <p style="color: #666;">${notification.message}</p>
+          ${notification.link ? `
+            <a href="${notification.link}" 
+               style="display: inline-block; padding: 10px 20px; background-color: #007bff; 
+                      color: white; text-decoration: none; border-radius: 5px;">
+              View Details
+            </a>
+          ` : ''}
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Notification email sent to ${userEmail}`);
+  } catch (error) {
+    console.error('Error sending notification email:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendTeamInvitation,
+  sendNotificationEmail,
 }; 

@@ -4,6 +4,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '../redux/store';
 import { SocketProvider } from '@/contexts/SocketContext';
 import NotificationHandler from '@/components/NotificationHandler';
+import { SnackbarProvider } from 'notistack';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -29,10 +30,12 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor}>
-            <SocketProvider>
-              <NotificationHandler />
-              {children}
-            </SocketProvider>
+            <SnackbarProvider maxSnack={3}>
+              <SocketProvider>
+                <NotificationHandler />
+                {children}
+              </SocketProvider>
+            </SnackbarProvider>
           </PersistGate>
         </Provider>
       </body>

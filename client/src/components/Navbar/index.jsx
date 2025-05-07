@@ -6,6 +6,7 @@ import { setIsDarkMode, setIsSidebarCollapsed } from "../../redux/slices/globalS
 import { useGetCurrentUserQuery } from "../../redux/services/api";
 import { logout } from "../../redux/slices/authSlice";
 import Image from "next/image";
+import NotificationIcon from "../notifications/NotificationIcon";
 
 const Navbar = () => {
   const dispatch = useAppDispatch();
@@ -27,7 +28,6 @@ const Navbar = () => {
   };
 
   if (!currentUser) return null;
-  const currentUserDetails = currentUser?.userDetails;
 
   return (
     <div className="flex items-center justify-between bg-white px-4 py-3 dark:bg-black">
@@ -58,6 +58,7 @@ const Navbar = () => {
             <Moon className="h-6 w-6 cursor-pointer dark:text-white" />
           )}
         </button>
+        <NotificationIcon />
         <Link
           href="/settings"
           className={
@@ -71,10 +72,10 @@ const Navbar = () => {
         <div className="ml-2 mr-5 hidden min-h-[2em] w-[0.1rem] bg-gray-200 md:inline-block"></div>
         <div className="hidden items-center justify-between md:flex">
           <div className="align-center flex h-9 w-9 justify-center">
-            {!!currentUserDetails?.profilePictureUrl ? (
+            {!!currentUser?.profilePictureUrl ? (
               <Image
                 src={""}
-                alt={currentUserDetails?.username || "User Profile Picture"}
+                alt={currentUser?.username || "User Profile Picture"}
                 width={100}
                 height={50}
                 className="h-full rounded-full object-cover"
@@ -84,7 +85,7 @@ const Navbar = () => {
             )}
           </div>
           <span className="mx-3 text-gray-800 dark:text-white">
-            {currentUserDetails?.username}
+            {currentUser?.name}
           </span>
           <button
             className="hidden rounded bg-blue-400 px-4 py-2 text-xs font-bold text-white hover:bg-blue-500 md:block"

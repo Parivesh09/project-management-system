@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSocket } from '@/contexts/SocketContext';
-import { useSnackbar } from '@mui/material';
+import { useSnackbar } from 'notistack';
 import { useDispatch } from 'react-redux';
 import { addNotification } from '@/redux/slices/notificationSlice';
 
@@ -20,6 +20,10 @@ export default function NotificationHandler() {
       enqueueSnackbar(notification.message, {
         variant: notification.type === 'ERROR' ? 'error' : 'success',
         autoHideDuration: 5000,
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'right',
+        },
       });
 
       // If browser notifications are supported and permitted, show one

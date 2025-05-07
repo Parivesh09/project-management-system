@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, usePathname } from 'next/navigation';
 import { selectIsAuthenticated, logout, setCredentials } from '../redux/slices/authSlice';
 import { useGetCurrentUserQuery } from '../redux/services/api';
+import { initializeSocket, disconnectSocket } from '../services/socket';
 import Loader from '../components/Loader';
 
 const PUBLIC_PATHS = ['/login', '/register'];
@@ -22,61 +23,29 @@ const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       dispatch(setCredentials({ token }));
-      router.push('/');
+      initializeSocket(token);
     }
-  }, [dispatch, router]);
+  }, [dispatch]);
 
   useEffect(() => {
-    let mounted = true;
-    
-    const handleAuth = async () => {
-      if (!mounted || isLoading) return;
-
-      // If getCurrentUser fails or returns user not found, logout
-      if (isError || (isAuthenticated && !user)) {
-        console.error('Auth error or user not found:', error);
+    if (isError) {
+      console.error('Error fetching user:', error);
         dispatch(logout());
-        if (pathname !== '/login') {
-          router.replace('/login?error=user_not_found');
+      router.push('/login');
         }
-        return;
-      }
+  }, [isError, error, dispatch, router]);
 
-      const isPublicPath = PUBLIC_PATHS.includes(pathname);
-      
-      if (!isAuthenticated && !isPublicPath) {
-        // Prevent multiple redirects by checking current path
-        if (pathname !== '/login') {
-          router.replace('/login');
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !PUBLIC_PATHS.includes(pathname)) {
+      router.push('/login');
         }
-      } else if (isAuthenticated && isPublicPath) {
-        // Prevent multiple redirects by checking current path
-        if (pathname !== '/') {
-          router.replace('/');
-        }
-      }
-    };
+  }, [isLoading, isAuthenticated, pathname, router]);
 
-    handleAuth();
-
-    return () => {
-      mounted = false;
-    };
-  }, [isAuthenticated, isLoading, pathname, user, isError, error]);
-
-  // Show loading state only during initial data fetch
-  if (isLoading && isAuthenticated && !isError) {
-    return (
-      <Loader fullScreen />
-    );
+  if (isLoading) {
+    return <Loader />;
   }
 
-  // Allow rendering children for public paths even when not authenticated
-  if (!isAuthenticated && !PUBLIC_PATHS.includes(pathname)) {
-    return null;
-  }
-
-  return <>{children}</>;
+  return children;
 };
 
 export default AuthProvider;

@@ -9,21 +9,35 @@ import {
   Table,
 } from "lucide-react";
 import React from "react";
+import EditIcon from '@mui/icons-material/Edit';
 
-
-const ProjectHeader = ({ activeTab, setActiveTab, project, setIsModalNewTaskOpen }) => {
+const ProjectHeader = ({
+  activeTab,
+  setActiveTab,
+  project,
+  setIsModalNewTaskOpen,
+  setIsModalEditProjectOpen,
+}) => {
   return (
     <div className="px-4 xl:px-6">
       <div className="pb-6 pt-6 lg:pb-4 lg:pt-8">
         <Header
           name={project ? project.name : "Project Details"}
           buttonComponent={
-            <button
-              className="flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
-              onClick={() => setIsModalNewTaskOpen(true)}
-            >
-              <PlusSquare className="mr-2 h-5 w-5" /> New Task
-            </button>
+            <div className="flex items-center gap-2">
+               <button
+                className="flex items-center rounded-md px-3 py-2 text-gray-500 hover:bg-gray-200"
+                onClick={() => setIsModalEditProjectOpen(true)}
+              >
+                <EditIcon fontSize="small" /> Edit Project
+              </button>
+              <button
+                className="flex items-center rounded-md bg-blue-primary px-3 py-2 text-white hover:bg-blue-600"
+                onClick={() => setIsModalNewTaskOpen(true)}
+              >
+                <PlusSquare className="mr-2 h-5 w-5" /> New Task
+              </button>
+            </div>
           }
         />
       </div>
@@ -48,7 +62,6 @@ const ProjectHeader = ({ activeTab, setActiveTab, project, setIsModalNewTaskOpen
     </div>
   );
 };
-
 
 const TabButton = ({ name, icon, setActiveTab, activeTab }) => {
   const isActive = activeTab === name;

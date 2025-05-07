@@ -10,7 +10,7 @@ export function SocketProvider({ children }) {
 
   useEffect(() => {
     if (token) {
-      const socketInstance = io(process.env.NEXT_PUBLIC_API_URL, {
+      const socketInstance = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
         auth: { token }
       });
 

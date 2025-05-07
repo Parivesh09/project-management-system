@@ -101,7 +101,7 @@ const ListView = ({
               sx={dataGridSxStyles(isDarkMode)}
               onRowClick={handleTaskClick}
             />
-          </div>
+    </div>
   );
 };
 
