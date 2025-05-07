@@ -3,6 +3,22 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   notifications: [],
   unreadCount: 0,
+  preferences: {
+    email: {
+      enabled: true,
+      taskAssigned: true,
+      taskUpdated: true,
+      taskCompleted: true,
+      taskCommented: true,
+    },
+    inApp: {
+      enabled: true,
+      taskAssigned: true,
+      taskUpdated: true,
+      taskCompleted: true,
+      taskCommented: true,
+    },
+  },
 };
 
 const notificationSlice = createSlice({
@@ -43,6 +59,15 @@ const notificationSlice = createSlice({
       state.notifications = [];
       state.unreadCount = 0;
     },
+    setPreferences: (state, action) => {
+      state.preferences = action.payload;
+    },
+    updatePreferences: (state, action) => {
+      state.preferences = {
+        ...state.preferences,
+        ...action.payload,
+      };
+    },
   },
 });
 
@@ -53,6 +78,13 @@ export const {
   addNotification,
   removeNotification,
   clearNotifications,
+  setPreferences,
+  updatePreferences,
 } = notificationSlice.actions;
+
+// Selectors
+export const selectNotifications = (state) => state.notifications.notifications;
+export const selectUnreadCount = (state) => state.notifications.unreadCount;
+export const selectNotificationPreferences = (state) => state.notifications.preferences;
 
 export default notificationSlice.reducer; 
