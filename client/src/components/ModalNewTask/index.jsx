@@ -60,6 +60,17 @@ const ModalNewTask = ({
     }
   }, [projectId, allowPersonal]);
 
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setDescription(task.description);
+      setStatus(task.status);
+      setPriority(task.priority);
+      setDueDate(task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '');
+      setAssigneeId(task.assignee?.id || '');
+    }
+  }, [task, assigneeId]);
+
   const handleSubmit = async () => {
     if (!title || !dueDate) return;
     if (!isPersonal && !selectedProjectId) return;

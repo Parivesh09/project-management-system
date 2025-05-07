@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, usePathname } from 'next/navigation';
-import { selectIsAuthenticated, logout } from '../redux/slices/authSlice';
+import { selectIsAuthenticated, logout, setCredentials } from '../redux/slices/authSlice';
 import { useGetCurrentUserQuery } from '../redux/services/api';
 import Loader from '../components/Loader';
 
@@ -17,6 +17,14 @@ const AuthProvider = ({ children }) => {
   const { data: user, isLoading, error, isError } = useGetCurrentUserQuery(undefined, {
     skip: !isAuthenticated,
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      dispatch(setCredentials({ token }));
+      router.push('/');
+    }
+  }, [dispatch, router]);
 
   useEffect(() => {
     let mounted = true;

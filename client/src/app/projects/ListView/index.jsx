@@ -7,6 +7,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { dataGridClassNames, dataGridSxStyles } from "../../../lib/utils";
 import { useAppSelector } from "../../../redux/store";
 import { Chip, Tooltip } from "@mui/material";
+import { useGetCurrentUserQuery } from "../../../redux/services/api";
 
 const ListView = ({
   setIsModalNewTaskOpen,
@@ -14,8 +15,10 @@ const ListView = ({
   setTask,
   tasks: filteredTasks,
 }) => {
-  if (!filteredTasks) return <Loader />;
   const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+  const { data: currentUser } = useGetCurrentUserQuery();
+
+  if (!filteredTasks) return <Loader />;
   const columns = [
     { field: "title", headerName: "Title", width: 200 },
     {
