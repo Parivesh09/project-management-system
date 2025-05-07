@@ -1,11 +1,9 @@
 const withPWA = require('next-pwa');
 
-const config = withPWA({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-})({
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -16,6 +14,13 @@ const config = withPWA({
       }
     ]
   }
-});
+};
+
+const config = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development'
+})(nextConfig);
 
 module.exports = config; 
