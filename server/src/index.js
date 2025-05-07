@@ -56,6 +56,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+app.get('/', (req, res) => {
+  res.json({ message: 'TMS server is running for testing....' });
+});
+
 const PORT = process.env.PORT || 5000;
 
 httpServer.listen(PORT, () => {
