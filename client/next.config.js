@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Temporarily disable standalone output to fix build issue
-  // output: 'standalone',
+  output: 'standalone',
+  experimental: {
+    outputFileTracingRoot: require('path').join(__dirname, '../'),
+  },
 };
 
 module.exports = nextConfig;
