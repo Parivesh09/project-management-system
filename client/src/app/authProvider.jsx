@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useRouter, usePathname } from 'next/navigation';
 import { selectIsAuthenticated, logout } from '../redux/slices/authSlice';
 import { useGetCurrentUserQuery } from '../redux/services/api';
+import Loader from '../components/Loader';
 
 const PUBLIC_PATHS = ['/login', '/register'];
 
@@ -58,9 +59,7 @@ const AuthProvider = ({ children }) => {
   // Show loading state only during initial data fetch
   if (isLoading && isAuthenticated && !isError) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
+      <Loader fullScreen />
     );
   }
 

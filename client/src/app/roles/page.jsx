@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from 'react';
+import Loader from '../../components/Loader';
 import {
   useGetUsersQuery,
   useUpdateUserMutation,
@@ -94,7 +95,7 @@ const RoleManagerPage = () => {
     }
   ];
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <Loader fullScreen />;
 
   // Check if user has permission to access this page
   if (currentUser?.role !== 'SUPER_ADMIN' && currentUser?.role !== 'ADMIN') {
