@@ -91,18 +91,26 @@ const TeamDetailsDialog = ({ open, onClose, teamId }) => {
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-        <DialogTitle>
+      <Dialog 
+        open={open} 
+        onClose={onClose} 
+        maxWidth="lg" 
+        fullWidth
+        PaperProps={{
+          className: "dark:bg-dark-secondary",
+        }}
+      >
+        <DialogTitle className="dark:bg-dark-secondary">
           <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6">{team.name}</Typography>
-            <IconButton onClick={onClose}>
+            <Typography variant="h6" className="dark:text-white">{team.name}</Typography>
+            <IconButton onClick={onClose} className="dark:text-white">
               <CloseIcon />
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent className="dark:bg-dark-secondary">
           <Box mb={3}>
-            <Typography variant="body1" color="textSecondary">
+            <Typography variant="body1" className="dark:text-gray-300">
               {team.description}
             </Typography>
 
@@ -115,6 +123,7 @@ const TeamDetailsDialog = ({ open, onClose, teamId }) => {
                     refetchInviteCode();
                     setOpenInviteDialog(true);
                   }}
+                  className="dark:bg-primary dark:text-white"
                 >
                   Invite Members
                 </Button>
@@ -124,24 +133,24 @@ const TeamDetailsDialog = ({ open, onClose, teamId }) => {
 
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom className="dark:text-white">
                 Team Members
               </Typography>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} className="dark:bg-dark-tertiary">
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Email</TableCell>
-                      <TableCell>Role</TableCell>
+                      <TableCell className="dark:text-white dark:border-gray-700">Name</TableCell>
+                      <TableCell className="dark:text-white dark:border-gray-700">Email</TableCell>
+                      <TableCell className="dark:text-white dark:border-gray-700">Role</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {team.members.map((member) => (
-                      <TableRow key={member.id}>
-                        <TableCell>{member.user.name}</TableCell>
-                        <TableCell>{member.user.email}</TableCell>
-                        <TableCell>{member.role}</TableCell>
+                      <TableRow key={member.id} className="dark:border-gray-700">
+                        <TableCell className="dark:text-gray-300">{member.user.name}</TableCell>
+                        <TableCell className="dark:text-gray-300">{member.user.email}</TableCell>
+                        <TableCell className="dark:text-gray-300">{member.role}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -150,24 +159,24 @@ const TeamDetailsDialog = ({ open, onClose, teamId }) => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom className="dark:text-white">
                 Projects
               </Typography>
-              <TableContainer component={Paper}>
+              <TableContainer component={Paper} className="dark:bg-dark-tertiary">
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Name</TableCell>
-                      <TableCell>Owner</TableCell>
-                      <TableCell>Manager</TableCell>
+                      <TableCell className="dark:text-white dark:border-gray-700">Name</TableCell>
+                      <TableCell className="dark:text-white dark:border-gray-700">Owner</TableCell>
+                      <TableCell className="dark:text-white dark:border-gray-700">Manager</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {team.projects.map((project) => (
-                      <TableRow key={project.id}>
-                        <TableCell>{project.name}</TableCell>
-                        <TableCell>{project.owner.name}</TableCell>
-                        <TableCell>{project.manager?.name || 'N/A'}</TableCell>
+                      <TableRow key={project.id} className="dark:border-gray-700">
+                        <TableCell className="dark:text-gray-300">{project.name}</TableCell>
+                        <TableCell className="dark:text-gray-300">{project.owner.name}</TableCell>
+                        <TableCell className="dark:text-gray-300">{project.manager?.name || 'N/A'}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -176,6 +185,11 @@ const TeamDetailsDialog = ({ open, onClose, teamId }) => {
             </Grid>
           </Grid>
         </DialogContent>
+        <DialogActions className="dark:bg-dark-secondary">
+          <Button onClick={onClose} className="dark:text-gray-300">
+            Close
+          </Button>
+        </DialogActions>
       </Dialog>
 
       <Dialog 

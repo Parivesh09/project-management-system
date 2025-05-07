@@ -44,14 +44,33 @@ if (process.env.NODE_ENV !== 'production') {
 
 const createAuditLog = async (userId, action, details, taskId = null) => {
   try {
+    // Extract entityId from details if it's an object, otherwise use a default
+    const entityId = typeof details === 'object' 
+      ? (details.entityId || details.taskId || details.projectId || details.teamId)
+      : details;
+
+    if (!entityId) {
+      throw new Error('EntityId is required for audit log creation');
+    }
+
     const auditLog = await prisma.auditLog.create({
       data: {
-        userId,
         action,
         details,
-        taskId,
         entityType: details.entityType || action.split('_')[0].toLowerCase(),
-        entityId: details.entityId || details.taskId || details.projectId || taskId
+        entityId,
+        user: {
+          connect: {
+            id: userId
+          }
+        },
+        ...(taskId && {
+          task: {
+            connect: {
+              id: taskId
+            }
+          }
+        })
       }
     });
 

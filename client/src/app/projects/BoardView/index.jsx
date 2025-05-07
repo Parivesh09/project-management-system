@@ -9,30 +9,31 @@ import { EllipsisVertical, MessageSquareMore, Plus } from "lucide-react";
 import { format } from "date-fns";
 import Image from "next/image";
 import Loader from "../../../components/Loader";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const statusLabels = {
-  TODO: 'To Do',
-  IN_PROGRESS: 'Work In Progress',
-  UNDER_REVIEW: 'Under Review',
-  DONE: 'Completed',
+  TODO: "To Do",
+  IN_PROGRESS: "Work In Progress",
+  // UNDER_REVIEW: "Under Review",
+  DONE: "Completed",
 };
+
 const statusColors = {
-  TODO: '#2563EB',
-  IN_PROGRESS: '#059669',
-  UNDER_REVIEW: '#D97706',
-  COMPLETED: '#000000',
+  TODO: "#2563EB",
+  IN_PROGRESS: "#059669",
+  // UNDER_REVIEW: "#D97706",
+  COMPLETED: "#000000",
 };
+
 const BoardView = ({
   id,
   setIsModalNewTaskOpen,
   setIsModalEditTaskOpen,
   setTask,
+  tasks: filteredTasks,
 }) => {
-  console.log("id at the board view", id);
-
-  const { data: tasks, isLoading, error } = useGetTasksQuery({ projectId: id });
-
   const [updateTask] = useUpdateTaskMutation();
+
   const moveTask = async (taskId, statusKey) => {
     try {
       await updateTask({ id: taskId, status: statusKey }).unwrap();
@@ -41,8 +42,7 @@ const BoardView = ({
     }
   };
 
-  if (isLoading || !tasks) return <Loader />;
-  if (error) return <div>An error occurred while fetching tasks</div>;
+  if (!filteredTasks) return <Loader />;
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -51,7 +51,7 @@ const BoardView = ({
           <TaskColumn
             key={statusKey}
             statusKey={statusKey}
-            tasks={tasks}
+            tasks={filteredTasks}
             moveTask={moveTask}
             setIsModalNewTaskOpen={setIsModalNewTaskOpen}
             setIsModalEditTaskOpen={setIsModalEditTaskOpen}
@@ -92,16 +92,13 @@ const TaskColumn = ({
       className={`sl:py-4 rounded-lg py-2 xl:px-2 ${isOver ? "bg-blue-100 dark:bg-neutral-950" : ""}`}
     >
       <div className="mb-3 flex w-full">
-        <div
-          className="w-2 rounded-s-lg"
-          style={{ backgroundColor: color }}
-        />
+        <div className="w-2 rounded-s-lg" style={{ backgroundColor: color }} />
         <div className="flex w-full items-center justify-between rounded-e-lg bg-white px-5 py-4 dark:bg-dark-secondary">
           <h3 className="flex items-center text-lg font-semibold dark:text-white">
-            {statusLabels[statusKey]}{' '}
+            {statusLabels[statusKey]}{" "}
             <span
               className="ml-2 inline-block rounded-full bg-gray-200 p-1 text-center text-sm leading-none dark:bg-dark-tertiary"
-              style={{ width: '1.5rem', height: '1.5rem' }}
+              style={{ width: "1.5rem", height: "1.5rem" }}
             >
               {count}
             </span>
@@ -140,6 +137,7 @@ const Task = ({ task, setIsModalEditTaskOpen, setTask }) => {
       isDragging: !!monitor.isDragging(),
     }),
   }));
+  console.log("task", task);
 
   const taskTagsSplit = task.tags ? task.tags.split(",") : [];
 
@@ -235,33 +233,24 @@ const Task = ({ task, setIsModalEditTaskOpen, setTask }) => {
 
         {/* Users */}
         <div className="mt-3 flex items-center justify-between">
-          <div className="flex -space-x-[6px] overflow-hidden">
+          <div className="flex gap-2 overflow-hidden">
+            {task.creator && (
+              <div className="dark:text-white">
+                by{" "}
+                {task.creator.name === task.assignee.name
+                  ? "you"
+                  : task.creator.name}
+              </div>
+            )}
+            <div className="dark:text-white">-</div>
             {task.assignee && (
-              <Image
-                key={task.assignee.userId}
-                src={""}
-                alt={task.assignee.name}
-                width={30}
-                height={30}
-                className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
-              />
+              <div className="dark:text-white">
+                to{" "}
+                {task.assignee.name === task.creator.name
+                  ? "yourself"
+                  : task.assignee.name}
+              </div>
             )}
-            {task.author && (
-              <Image
-                key={task.author.userId}
-                src={""}
-                alt={task.author.name}
-                width={30}
-                height={30}
-                className="h-8 w-8 rounded-full border-2 border-white object-cover dark:border-dark-secondary"
-              />
-            )}
-          </div>
-          <div className="flex items-center text-gray-500 dark:text-neutral-500">
-            <MessageSquareMore size={20} />
-            <span className="ml-1 text-sm dark:text-neutral-400">
-              {numberOfComments}
-            </span>
           </div>
         </div>
       </div>

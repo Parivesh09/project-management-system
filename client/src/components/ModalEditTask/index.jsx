@@ -16,6 +16,7 @@ import {
   Select,
   TextField,
   Alert,
+  OutlinedInput,
 } from "@mui/material";
 // import { Status } from "../../constants/status";
 
@@ -47,7 +48,7 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
           ? formatISO(parseISO(task.dueDate), { representation: "date" })
           : "",
       );
-      setAssigneeId(task.assignedTo?.id || "");
+      setAssigneeId(task.assignee?.id || "");
     }
   }, [task]);
 
@@ -130,7 +131,13 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
           required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="dark:bg-dark-tertiary"
+          className="dark:text-white"
+          InputLabelProps={{
+            className: "dark:text-gray-300",
+          }}
+          InputProps={{
+            className: "dark:text-white dark:border-gray-600",
+          }}
         />
 
         <TextField
@@ -141,7 +148,13 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
           rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="dark:bg-dark-tertiary"
+          className="dark:text-white"
+          InputLabelProps={{
+            className: "dark:text-gray-300",
+          }}
+          InputProps={{
+            className: "dark:text-white dark:border-gray-600",
+          }}
         />
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -151,15 +164,34 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
               value={status}
               label="Status"
               onChange={(e) => setStatus(sendingStatus[e.target.value])}
+              className="dark:text-white"
+              input={
+                <OutlinedInput
+                  label="Status"
+                  className="dark:border-gray-600 dark:text-white"
+                />
+              }
+              MenuProps={{
+                PaperProps: {
+                  className: "dark:bg-dark-secondary",
+                },
+              }}
             >
-              <MenuItem value={sendingStatus.ToDo}>To Do</MenuItem>
-              <MenuItem value={sendingStatus.WorkInProgress}>
+              <MenuItem className="dark:text-white" value={sendingStatus.ToDo}>
+                To Do
+              </MenuItem>
+              <MenuItem
+                className="dark:text-white"
+                value={sendingStatus.WorkInProgress}
+              >
                 In Progress
               </MenuItem>
-              <MenuItem value={sendingStatus.UnderReview}>
-                Under Review
+              <MenuItem
+                className="dark:text-white"
+                value={sendingStatus.Completed}
+              >
+                Completed
               </MenuItem>
-              <MenuItem value={sendingStatus.Completed}>Completed</MenuItem>
             </Select>
           </FormControl>
 
@@ -169,12 +201,34 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
               value={priority}
               label="Priority"
               onChange={(e) => setPriority(e.target.value)}
+              className="dark:text-white"
+              input={
+                <OutlinedInput
+                  label="Priority"
+                  className="dark:border-gray-600 dark:text-white"
+                />
+              }
+              MenuProps={{
+                PaperProps: {
+                  className: "dark:bg-dark-secondary",
+                },
+              }}
             >
-              <MenuItem value={Priority.Urgent}>Urgent</MenuItem>
-              <MenuItem value={Priority.High}>High</MenuItem>
-              <MenuItem value={Priority.Medium}>Medium</MenuItem>
-              <MenuItem value={Priority.Low}>Low</MenuItem>
-              <MenuItem value={Priority.Backlog}>Backlog</MenuItem>
+              <MenuItem className="dark:text-white" value={Priority.Urgent}>
+                Urgent
+              </MenuItem>
+              <MenuItem className="dark:text-white" value={Priority.High}>
+                High
+              </MenuItem>
+              <MenuItem className="dark:text-white" value={Priority.Medium}>
+                Medium
+              </MenuItem>
+              <MenuItem className="dark:text-white" value={Priority.Low}>
+                Low
+              </MenuItem>
+              <MenuItem className="dark:text-white" value={Priority.Backlog}>
+                Backlog
+              </MenuItem>
             </Select>
           </FormControl>
         </div>
@@ -187,7 +241,10 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
             InputLabelProps={{ shrink: true }}
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="dark:bg-dark-tertiary"
+            className="dark:text-white"
+            InputProps={{
+              className: "dark:text-white dark:border-gray-600",
+            }}
           />
 
           <FormControl fullWidth>
@@ -196,10 +253,22 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
               value={assigneeId}
               label="Assign To"
               onChange={(e) => setAssigneeId(e.target.value)}
+              className="dark:text-white"
+              input={
+                <OutlinedInput
+                  label="Assign To"
+                  className="dark:border-gray-600 dark:text-white"
+                />
+              }
+              MenuProps={{
+                PaperProps: {
+                  className: "dark:bg-dark-secondary",
+                },
+              }}
             >
               {/* Current user is always first in the list */}
               {currentUser && (
-                <MenuItem value={currentUser.id}>
+                <MenuItem className="dark:text-white" value={currentUser.id}>
                   {currentUser.name} (yourself)
                 </MenuItem>
               )}
@@ -207,7 +276,11 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
               {users
                 ?.filter((user) => user.id !== currentUser?.id)
                 .map((user) => (
-                  <MenuItem key={user.id} value={user.id}>
+                  <MenuItem
+                    className="dark:text-white"
+                    key={user.id}
+                    value={user.id}
+                  >
                     {user.name}
                   </MenuItem>
                 ))}
@@ -219,7 +292,7 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
             onClick={() => {
               handleDeleteTask();
             }}
-            className="mt-4 flex w-full justify-center rounded-md border border-transparent bg-red-700 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="mt-4 flex w-full justify-center rounded-md border border-transparent bg-red-700 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-600 dark:border-red-500 dark:bg-transparent dark:text-red-500 dark:hover:border-red-600 dark:hover:text-red-600"
           >
             Delete Task
           </button>
@@ -227,7 +300,7 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
             type="submit"
             className={`focus-offset-2 mt-4 flex w-full justify-center rounded-md border border-transparent bg-green-700 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-blue-600 ${
               !isFormValid() || isLoading ? "cursor-not-allowed opacity-50" : ""
-            }`}
+            } dark:border-green-500 dark:bg-transparent dark:text-green-500 dark:hover:border-green-600 dark:hover:text-green-600`}
             disabled={!isFormValid() || isLoading}
           >
             {isLoading ? "Updating..." : "Update Task"}

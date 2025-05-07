@@ -61,7 +61,7 @@ exports.getTeams = async (req, res) => {
 };
 
 exports.createTeam = async (req, res) => {
-  const { name, description, memberIds = [] } = req.body;
+  const { name, description, memberIds = [], projectIds = [] } = req.body;
   const creatorId = req.user.userId;
   
   try {
@@ -87,7 +87,19 @@ exports.createTeam = async (req, res) => {
               role: 'USER'
             }))
           ]
-        }
+        },
+        // Add project associations if provided
+        ...(projectIds.length > 0 && {
+          projects: {
+            create: projectIds.map(projectId => ({
+              project: {
+                connect: {
+                  id: projectId
+                }
+              }
+            }))
+          }
+        })
       },
       include: {
         members: {
@@ -101,6 +113,17 @@ exports.createTeam = async (req, res) => {
               }
             }
           }
+        },
+        projects: {
+          include: {
+            project: {
+              select: {
+                id: true,
+                name: true,
+                description: true
+              }
+            }
+          }
         }
       }
     });
@@ -109,10 +132,20 @@ exports.createTeam = async (req, res) => {
     await createAuditLog(
       creatorId,
       'TEAM_CREATED',
-      `Created team: ${team.name}`
+      {
+        teamId: team.id,
+        teamName: team.name,
+        details: `Created team: ${team.name}`
+      }
     );
 
-    res.json(team);
+    // Transform the response to maintain backward compatibility
+    const formattedTeam = {
+      ...team,
+      projects: team.projects.map(pt => pt.project)
+    };
+
+    res.json(formattedTeam);
   } catch (error) {
     console.error('Create team error:', error);
     res.status(500).json({ message: `Error creating team: ${error.message}` });

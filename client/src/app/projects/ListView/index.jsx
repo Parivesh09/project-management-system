@@ -1,30 +1,104 @@
-import Header from "../../../components/Header";
-import TaskCard from "../../../components/TaskCard";
-import { useGetTasksQuery } from "../../../redux/services/api";
 import React from "react";
+import { format } from "date-fns";
+import { MessageSquareMore, MoreVertical } from "lucide-react";
+import Image from "next/image";
 import Loader from "../../../components/Loader";
+import { DataGrid } from "@mui/x-data-grid";
+import { dataGridClassNames, dataGridSxStyles } from "../../../lib/utils";
+import { useAppSelector } from "../../../redux/store";
+import { Chip, Tooltip } from "@mui/material";
 
-const ListView = ({ id, setIsModalNewTaskOpen }) => {
-  const {
-    data: tasks,
-    error,
-    isLoading,
-  } = useGetTasksQuery({ projectId: id });
+const ListView = ({
+  setIsModalNewTaskOpen,
+  setIsModalEditTaskOpen,
+  setTask,
+  tasks: filteredTasks,
+}) => {
+  if (!filteredTasks) return <Loader />;
+  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
+  const columns = [
+    { field: "title", headerName: "Title", width: 200 },
+    {
+      field: "description",
+      headerName: "Description",
+      width: 300,
+      renderCell: (params) => (
+        <Tooltip title={params?.value || ""}>
+          <div className="max-w-full truncate">{params?.value || ""}</div>
+        </Tooltip>
+      ),
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params?.value || ""}
+          className="dark:text-white dark:border-white"
+          color={
+            params.value === "TODO"
+              ? "default"
+              : params.value === "IN_PROGRESS"
+                ? "primary"
+                : "success"
+          }
+          size="small"
+        />
+      ),
+    },
+    {
+      field: "priority",
+      headerName: "Priority",
+      width: 120,
+      renderCell: (params) => (
+        <Chip
+          label={params?.value || ""}
+          color={
+            params?.value === "HIGH"
+              ? "error"
+              : params?.value === "MEDIUM"
+                ? "warning"
+                : "info"
+          }
+          size="small"
+        />
+      ),
+    },
+    {
+      field: "dueDate",
+      headerName: "Due Date",
+      width: 150,
+      renderCell: (params) => {
+        if (!params?.value) return "";
+        return new Date(params?.value).toLocaleDateString();
+      },
+    },
+    {
+      field: "projectName",
+      headerName: "Project",
+      width: 200,
+      valueGetter: (params) => params?.row?.project?.name || "Personal",
+    },
+  ];
 
-  if (isLoading) return <Loader />;
-  if (error) return <div>An error occurred while fetching tasks</div>;
+  const handleTaskClick = (params) => {
+    setTask(params.row);
+    setIsModalEditTaskOpen(true);
+  };
 
   return (
-    <div className="px-4 pb-8 xl:px-6">
-      <div className="pt-5">
-        <Header
-          name="List"
-        />
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-        {tasks?.map((task) => <TaskCard key={task.id} task={task} />)}
-      </div>
-    </div>
+    <div style={{ height: 600, width: "100%" }}>
+      <DataGrid
+              rows={filteredTasks || []}
+              columns={columns}
+              pageSize={10}
+              rowsPerPageOptions={[10]}
+              className={dataGridClassNames}
+              sx={dataGridSxStyles(isDarkMode)}
+              onRowClick={handleTaskClick}
+            />
+          </div>
   );
 };
 

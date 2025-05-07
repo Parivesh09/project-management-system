@@ -15,6 +15,7 @@ import ModalNewTask from "../../components/ModalNewTask";
 import ModalEditTask from "../../components/ModalEditTask";
 import TasksBoard from "./board";
 import TaskHeader from "./TaskHeader";
+import TaskSearch from "../../components/TaskSearch";
 
 const TasksPage = () => {
   const { data: currentUser } = useGetCurrentUserQuery();
@@ -24,6 +25,12 @@ const TasksPage = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [viewMode, setViewMode] = useState("list");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    status: null,
+    priority: null,
+    dueDate: null,
+  });
 
   const { data: tasks, isLoading: isTasksLoading } = useGetTasksQuery({
     creatorId: currentUser?.id,
@@ -53,25 +60,102 @@ const TasksPage = () => {
     setIsModalEditTaskOpen(true);
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilter = (newFilters) => {
+    setFilters(newFilters);
+  };
+
+  const isTaskDueToday = (dueDate) => {
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    return (
+      taskDate.getDate() === today.getDate() &&
+      taskDate.getMonth() === today.getMonth() &&
+      taskDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isTaskDueThisWeek = (dueDate) => {
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    const diffTime = taskDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 7;
+  };
+
+  const isTaskDueThisMonth = (dueDate) => {
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    return (
+      taskDate.getMonth() === today.getMonth() &&
+      taskDate.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const isTaskOverdue = (dueDate) => {
+    const today = new Date();
+    const taskDate = new Date(dueDate);
+    return taskDate < today;
+  };
+
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
 
-    if (activeTab === 0) {
-      return tasks;
-    }
+    let filtered = tasks;
 
+    // Filter by tab
     if (activeTab === 1) {
-      return tasks.filter((task) => !task.projectId);
+      filtered = filtered.filter((task) => !task.projectId);
+    } else if (activeTab === 2) {
+      filtered = selectedProjectId
+        ? filtered.filter((task) => task.projectId === selectedProjectId)
+        : filtered.filter((task) => task.projectId);
     }
 
-    if (activeTab === 2) {
-      return selectedProjectId
-        ? tasks.filter((task) => task.projectId === selectedProjectId)
-        : tasks.filter((task) => task.projectId);
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (task) =>
+          task.title.toLowerCase().includes(query) ||
+          (task.description && task.description.toLowerCase().includes(query))
+      );
     }
 
-    return tasks;
-  }, [tasks, activeTab, selectedProjectId]);
+    // Filter by status
+    if (filters.status) {
+      filtered = filtered.filter((task) => task.status === filters.status);
+    }
+
+    // Filter by priority
+    if (filters.priority) {
+      filtered = filtered.filter((task) => task.priority === filters.priority);
+    }
+
+    // Filter by due date
+    if (filters.dueDate) {
+      filtered = filtered.filter((task) => {
+        if (!task.dueDate) return false;
+        switch (filters.dueDate) {
+          case "today":
+            return isTaskDueToday(task.dueDate);
+          case "week":
+            return isTaskDueThisWeek(task.dueDate);
+          case "month":
+            return isTaskDueThisMonth(task.dueDate);
+          case "overdue":
+            return isTaskOverdue(task.dueDate);
+          default:
+            return true;
+        }
+      });
+    }
+
+    return filtered;
+  }, [tasks, activeTab, selectedProjectId, searchQuery, filters]);
 
   const columns = [
     { field: "title", headerName: "Title", width: 200 },
@@ -92,6 +176,7 @@ const TasksPage = () => {
       renderCell: (params) => (
         <Chip
           label={params?.value || ""}
+          className="dark:text-white dark:border-white"
           color={
             params.value === "TODO"
               ? "default"
@@ -125,7 +210,7 @@ const TasksPage = () => {
       field: "dueDate",
       headerName: "Due Date",
       width: 150,
-      valueFormatter: (params) => {
+      renderCell: (params) => {
         if (!params?.value) return "";
         return new Date(params?.value).toLocaleDateString();
       },
@@ -159,19 +244,22 @@ const TasksPage = () => {
           </Tabs>
         </Box>
 
-        {activeTab === 2 && projects?.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2 dark:text-white">
-            {projects?.map((project) => (
-              <Chip
-                key={project.id}
-                label={project.name}
-                onClick={() => setSelectedProjectId(project.id)}
-                color={selectedProjectId === project.id ? "primary" : "default"}
-                className="mb-2 dark:text-white"
-              />
-            ))}
-          </div>
-        )}
+        <div className="mb-4 flex items-center justify-between">
+          {activeTab === 2 && projects?.length > 0 && (
+            <div className="flex flex-wrap gap-2 dark:text-white">
+              {projects?.map((project) => (
+                <Chip
+                  key={project.id}
+                  label={project.name}
+                  onClick={() => setSelectedProjectId(project.id)}
+                  color={selectedProjectId === project.id ? "primary" : "default"}
+                  className="mb-2 dark:text-white"
+                />
+              ))}
+            </div>
+          )}
+          <TaskSearch onSearch={handleSearch} onFilter={handleFilter} />
+        </div>
 
         {viewMode === "list" && (
           <div style={{ height: 600, width: "100%" }}>

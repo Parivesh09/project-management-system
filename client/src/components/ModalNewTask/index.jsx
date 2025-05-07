@@ -191,9 +191,6 @@ const ModalNewTask = ({
               <MenuItem value={sendingStatus.WorkInProgress}>
                 In Progress
               </MenuItem>
-              <MenuItem value={sendingStatus.UnderReview}>
-                Under Review
-              </MenuItem>
               <MenuItem value={sendingStatus.Completed}>Completed</MenuItem>
             </Select>
           </FormControl>
@@ -288,6 +285,7 @@ const ModalNewTask = ({
         {allowPersonal && (
           <div>
             <FormControlLabel
+              className="dark:text-white"
               control={
                 <Switch
                   checked={isPersonal}

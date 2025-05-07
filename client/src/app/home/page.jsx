@@ -9,7 +9,7 @@ import {
 } from "../../redux/services/api";
 import React from "react";
 import { useAppSelector } from "../../redux/store";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbarContainer, GridToolbarFilterButton, GridToolbarExport } from "@mui/x-data-grid";
 import Header from "../../components/Header";
 import {
   Bar,
@@ -32,6 +32,13 @@ import AssignmentLateIcon from '@mui/icons-material/AssignmentLate';
 import CreateIcon from '@mui/icons-material/Create';
 import { useRouter } from 'next/navigation';
 import Loader from "../../components/Loader";
+
+const CustomToolbar = () => (
+  <GridToolbarContainer className="toolbar flex gap-2">
+    <GridToolbarFilterButton />
+    <GridToolbarExport />
+  </GridToolbarContainer>
+);
 
 const taskColumns = [
   { field: "title", headerName: "Title", width: 200 },
@@ -80,8 +87,6 @@ const HomePage = () => {
   // if (!dashboardData || !projects || tasksError) {
   //   return <div>Error fetching data</div>;
   // }
-
-  console.log("dashboardData", dashboardData);
 
   const { assignedTasks = [], createdTasks = [], overdueTasks = [], taskStats = {
     total: 0,
@@ -178,13 +183,23 @@ const HomePage = () => {
             rows={getTasksForTab()}
             columns={taskColumns}
             loading={isDashboardLoading}
-            getRowClassName={(params) => 
-              params.row.dueDate && new Date(params.row.dueDate) < new Date() ? 
-              'bg-red-100 dark:bg-red-900' : ''
-            }
-            getCellClassName={() => "data-grid-cell"}
+            getRowClassName={(params) => {
+              const baseClass = params.row.dueDate && new Date(params.row.dueDate) < new Date() 
+                ? 'bg-red-100 dark:bg-red-900' 
+                : '';
+              return `${baseClass} dark:text-gray-200`;
+            }}
+            getCellClassName={() => "data-grid-cell dark:text-gray-200"}
             className={dataGridClassNames}
             sx={dataGridSxStyles(isDarkMode)}
+            components={{
+              Toolbar: CustomToolbar,
+            }}
+            componentsProps={{
+              toolbar: {
+                className: "dark:text-gray-200",
+              },
+            }}
           />
         </div>
       </div>
@@ -220,17 +235,19 @@ const HomePage = () => {
                 )}
               </div>
               
-              <Typography variant="body2" color="textSecondary" className="mb-3">
+              <Typography variant="body2" color="textSecondary" className="mb-3 dark:text-white">
                 {team.description || 'No description'}
               </Typography>
               
               <Stack direction="row" spacing={1} className="mb-2">
                 <Chip 
+                  className="dark:text-white"
                   label={`${team.members.length} members`}
                   size="small"
                   icon={<GroupIcon />}
                 />
                 <Chip 
+                  className="dark:text-white"
                   label={`${team.projects.length} projects`}
                   size="small"
                 />
