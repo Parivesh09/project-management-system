@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 
 const ModalNewTask = ({
+  task,
   isOpen,
   onClose,
   projectId,
