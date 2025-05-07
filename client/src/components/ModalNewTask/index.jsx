@@ -49,7 +49,7 @@ const ModalNewTask = ({
     if (currentUser && !assigneeId) {
       setAssigneeId(currentUser.id);
     }
-  }, [currentUser]);
+  }, [currentUser, assigneeId]);
 
   // Update selected project when projectId prop changes
   useEffect(() => {

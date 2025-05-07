@@ -108,7 +108,7 @@ const ModalEditTask = ({ isOpen, onClose, task }) => {
       <Modal isOpen={isOpen} onClose={onClose} name="View Task">
         <div className="mt-4 space-y-6">
           <Alert severity="warning" className="mb-4">
-            You don't have permission to edit this task.
+            You don&apos;t have permission to edit this task.
           </Alert>
           <div className="space-y-4">
             <h3 className="text-lg font-semibold dark:text-white">{task.title}</h3>
