@@ -114,7 +114,6 @@ const HomePage = () => {
   ) || [];
 
   const isTeamAdmin = (team) => {
-    console.log("team......", team);
     const userMember = team.members.find(member => member.user.id === currentUser?.id);
     return userMember && ['ADMIN', 'MANAGER'].includes(userMember.role);
   };

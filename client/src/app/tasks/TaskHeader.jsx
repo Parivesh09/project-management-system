@@ -45,12 +45,6 @@ const TaskHeader = ({ viewMode, setViewMode, project, setIsModalNewTaskOpen }) =
             setActiveTab={setViewMode}
             activeTab={viewMode}
           />
-          {/* <TabButton
-            name="Table"
-            icon={<Table className="h-5 w-5" />}
-            setActiveTab={setViewMode}
-            activeTab={viewMode}
-          /> */}
         </div>
         <div className="flex items-center gap-2">
           <button className="text-gray-500 hover:text-gray-600 dark:text-neutral-500 dark:hover:text-gray-300">
