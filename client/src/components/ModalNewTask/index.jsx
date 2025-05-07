@@ -267,6 +267,7 @@ const ModalNewTask = ({
               InputLabelProps={{
                 className: "dark:text-gray-300",
               }}
+              disabled={isPersonal || allowPersonal}
               MenuProps={{
                 PaperProps: {
                   className: "dark:bg-dark-secondary dark:text-white",

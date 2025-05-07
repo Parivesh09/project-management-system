@@ -166,6 +166,16 @@ exports.createTask = async (req, res) => {
       }
     );
 
+    // Send notification to assignee if task is assigned
+    if (assigneeId && assigneeId !== creatorId) {
+      await sendNotification(assigneeId, {
+        type: 'taskAssigned',
+        title: 'New Task Assigned',
+        message: `You have been assigned to task: ${task.title}`,
+        link: `/tasks/${task.id}`
+      });
+    }
+
     res.status(201).json(task);
   } catch (error) {
     console.error('Create task error:', error);

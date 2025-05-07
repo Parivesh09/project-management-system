@@ -104,7 +104,7 @@ router.get('/', authenticate, getTeams);
  *       500:
  *         description: Server error
  */
-router.post('/', authenticate, authorize(['ADMIN','MANAGER']), createTeam);
+router.post('/', authenticate, createTeam);
 
 /**
  * @swagger

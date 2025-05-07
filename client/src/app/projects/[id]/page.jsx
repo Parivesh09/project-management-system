@@ -6,6 +6,7 @@ import Board from "../BoardView";
 import List from "../ListView";
 import ModalNewTask from "../../../components/ModalNewTask";
 import ModalEditTask from "../../../components/ModalEditTask";
+import ModalEditProject from "../../../components/ModalEditProject";
 import { useGetProjectByIdQuery, useGetTasksQuery } from "../../../redux/services/api";
 import Loader from "../../../components/Loader";
 import TaskSearch from "../../../components/TaskSearch";
@@ -17,6 +18,7 @@ const Project = ({ params }) => {
   const [task, setTask] = useState(null);
   const [isModalNewTaskOpen, setIsModalNewTaskOpen] = useState(false);
   const [isModalEditTaskOpen, setIsModalEditTaskOpen] = useState(false);
+  const [isModalEditProjectOpen, setIsModalEditProjectOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     status: null,
@@ -130,11 +132,17 @@ const Project = ({ params }) => {
         onClose={() => setIsModalEditTaskOpen(false)}
         task={task}
       />
+      <ModalEditProject
+        isOpen={isModalEditProjectOpen}
+        onClose={() => setIsModalEditProjectOpen(false)}
+        project={project}
+      />
       <ProjectHeader 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
         project={project} 
-        setIsModalNewTaskOpen={setIsModalNewTaskOpen} 
+        setIsModalNewTaskOpen={setIsModalNewTaskOpen}
+        setIsModalEditProjectOpen={setIsModalEditProjectOpen}
       />
       
       <div className="px-4 pb-2 pt-2">

@@ -33,7 +33,7 @@ const TasksPage = () => {
   });
 
   const { data: tasks, isLoading: isTasksLoading } = useGetTasksQuery({
-    creatorId: currentUser?.id,
+    assigneeId: currentUser?.id,
   });
 
   const { data: projects, isLoading: isProjectsLoading } = useGetProjectsQuery();
@@ -104,15 +104,23 @@ const TasksPage = () => {
   const filteredTasks = useMemo(() => {
     if (!tasks) return [];
 
-    let filtered = tasks;
+    let filtered = tasks.filter(task => 
+      task.assigneeId === currentUser?.id
+    );
 
     // Filter by tab
     if (activeTab === 1) {
-      filtered = filtered.filter((task) => !task.projectId);
+      filtered = filtered.filter(
+        (task) => !task.projectId && task.creatorId === currentUser?.id
+      );
     } else if (activeTab === 2) {
       filtered = selectedProjectId
-        ? filtered.filter((task) => task.projectId === selectedProjectId)
-        : filtered.filter((task) => task.projectId);
+        ? filtered.filter(
+            (task) => task.projectId === selectedProjectId
+          )
+        : filtered.filter(
+            (task) => task.projectId
+          );
     }
 
     // Filter by search query
@@ -155,7 +163,7 @@ const TasksPage = () => {
     }
 
     return filtered;
-  }, [tasks, activeTab, selectedProjectId, searchQuery, filters]);
+  }, [tasks, activeTab, selectedProjectId, searchQuery, filters, currentUser?.id]);
 
   const columns = [
     { field: "title", headerName: "Title", width: 200 },

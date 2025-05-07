@@ -18,7 +18,7 @@ const baseQuery = fetchBaseQuery({
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['User', 'Project', 'Task', 'Team', 'Comment', 'Notification', 'TeamInvite', 'Teams', 'Projects', 'Tasks', 'Users'],
+  tagTypes: ['User', 'Project', 'Task', 'Team', 'Comment', 'Notification', 'NotificationPreferences', 'TeamInvite', 'Teams', 'Projects', 'Tasks', 'Users'],
   endpoints: (builder) => ({
     // Auth endpoints
     login: builder.mutation({
@@ -64,12 +64,12 @@ export const api = createApi({
       invalidatesTags: ['Projects'],
     }),
     updateProject: builder.mutation({
-      query: ({ id, ...project }) => ({
-        url: `/projects/${id}`,
+      query: (project) => ({
+        url: `/projects/${project.id}`,
         method: 'PUT',
         body: project,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Project', id }],
+      invalidatesTags: ['Project'],
     }),
     deleteProject: builder.mutation({
       query: (id) => ({

@@ -12,11 +12,15 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     setCredentials: (state, { payload: { user, token } }) => {
-      state.user = user;
-      state.token = token;
-      state.isAuthenticated = true;
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', token);
+      if (token) {
+        state.token = token;
+        state.isAuthenticated = true;
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('token', token);
+        }
+      }
+      if (user) {
+        state.user = user;
       }
     },
     logout: (state) => {
@@ -36,25 +40,28 @@ const authSlice = createSlice({
       .addMatcher(
         api.endpoints.login.matchFulfilled,
         (state, { payload }) => {
-          console.log('Login successful:', payload);
           state.token = payload.token;
           state.user = payload.user;
           state.isAuthenticated = true;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('token', payload.token);
+          }
         }
       )
       .addMatcher(
         api.endpoints.register.matchFulfilled,
         (state, { payload }) => {
-          console.log('Registration successful:', payload);
           state.token = payload.token;
           state.user = payload.user;
           state.isAuthenticated = true;
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('token', payload.token);
+          }
         }
       )
       .addMatcher(
         api.endpoints.getCurrentUser.matchFulfilled,
         (state, { payload }) => {
-          console.log('Got current user:', payload);
           state.user = payload;
           state.isAuthenticated = true;
         }
@@ -62,10 +69,12 @@ const authSlice = createSlice({
       .addMatcher(
         api.endpoints.logout.matchFulfilled,
         (state) => {
-          console.log('Logout successful');
           state.user = null;
           state.token = null;
           state.isAuthenticated = false;
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
         }
       );
   },

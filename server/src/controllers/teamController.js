@@ -139,6 +139,18 @@ exports.createTeam = async (req, res) => {
       }
     );
 
+    // Send notifications to team members
+    for (const member of team.members) {
+      if (member.userId !== creatorId) {
+        await sendNotification(member.userId, {
+          type: 'teamCreated',
+          title: 'Added to Team',
+          message: `You have been added to team: ${team.name}`,
+          link: `/teams/${team.id}`
+        });
+      }
+    }
+
     // Transform the response to maintain backward compatibility
     const formattedTeam = {
       ...team,
