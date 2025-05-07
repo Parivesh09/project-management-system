@@ -20,6 +20,7 @@ const Navbar = () => {
   const handleSignOut = async () => {
     try {
       await dispatch(logout());
+      window.location.reload();
     } catch (error) {
       console.error("Error signing out: ", error);
     }
