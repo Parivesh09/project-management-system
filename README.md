@@ -2,6 +2,22 @@
 
 A full-stack project management system built with Node.js, React, and Prisma. The system includes features for project tracking, team collaboration, task management, and audit logging.
 
+## Test User Credentials
+
+You can use the following test accounts to explore the system's features:
+
+### 🔑 Admin User
+- **Email:** admin@example.com  
+- **Password:** admin123
+
+### 👨‍💼 Manager User
+- **Email:** manager@example.com  
+- **Password:** manager123
+
+### 👤 Regular User
+- **Email:** user@example.com  
+- **Password:** user123
+
 ## Features
 
 - **Project Management**
